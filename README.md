@@ -32,7 +32,6 @@ const route = makeRouter(function updater(root, node) {
     if (updater.postRedraw) updater.postRedraw();
 
 })
-```
 
 main = document.createElement('h1')
 main.innerHTML = 'Hello'

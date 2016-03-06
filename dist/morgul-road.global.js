@@ -259,10 +259,10 @@ var morgulRoad = (function () {
           forEach(value, function (item) {
                       /* eslint-enable no-loop-func */
             if (!duplicates[key][item]) {
-                duplicates[key][item] = true
-                keys.push(encodeURIComponent(key) + '=' +
+              duplicates[key][item] = true
+              keys.push(encodeURIComponent(key) + '=' +
                               encodeURIComponent(item))
-              }
+            }
           })
           str.push(keys.join('&'))
         } else if (value !== undefined) {
