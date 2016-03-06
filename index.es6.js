@@ -88,7 +88,7 @@ export default function makeRouter(effector) {
           if (currentRoute !== normalizeRoute(path)) redirect(path)
         }
 
-        effector.computePreRedrawHook = setScroll
+        effector.preRedraw = setScroll
         window[listener]()
 
         return
@@ -150,8 +150,8 @@ export default function makeRouter(effector) {
 
         if (window.history.pushState) {
           var method = replaceHistory ? 'replaceState' : 'pushState'
-          effector.computePreRedrawHook = setScroll
-          effector.computePostRedrawHook = function () {
+          effector.preRedraw = setScroll
+          effector.postRedraw = function () {
             window.history[method](null, document.title,
                         modes[route.mode] + currentRoute)
           }
