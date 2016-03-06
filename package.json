@@ -1,6 +1,6 @@
 {
   "name": "morgul-road",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The Mithril router extracted for standalone use.",
   "main": "dist/morgul-road-commonjs.js",
   "scripts": {
@@ -31,5 +31,4 @@
     "rollup": "^0.25.2",
     "uglify-js": "^2.6.0"
   }
-
 }
