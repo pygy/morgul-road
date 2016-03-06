@@ -1,0 +1,35 @@
+{
+  "name": "morgul-road",
+  "version": "0.1.0",
+  "description": "The Mithril router extracted for standalone use.",
+  "main": "dist/morgul-road-commonjs.js",
+  "scripts": {
+    "preversion": "npm run all",
+    "prepublish": "(in-publish && git push --follow-tags) || not-in-publish",
+    "all": "npm run build && npm run lint",
+    "build": "rm -f dist/*.js && node scripts/build.js",
+    "lint": "eslint --fix index.es6.js scripts/*.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pygy/morgul-road.git"
+  },
+  "keywords": [
+    "SPA",
+    "router"
+  ],
+  "author": "Leo Horie",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pygy/morgul-road/issues"
+  },
+  "homepage": "https://github.com/pygy/morgul-road#readme",
+  "devDependencies": {
+    "eslint": "^2.2.0",
+    "in-publish": "^2.0.0",
+    "rollup": "^0.25.2",
+    "uglify-js": "^2.6.0"
+  }
+
+}
