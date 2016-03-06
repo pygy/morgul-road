@@ -52,9 +52,29 @@ function forEach(list, f) {
         // function called in condition
   }
 }
+
+var modes = {pathname: '', hash: '#', search: '?'}
+var aElement = document.createElement('a')
+aElement.href = '/ö?ö#ö'
+
+function getURLPart(target, mode) {
+  // In this context, `decodeURI` is the right function to call
+  // (not `decodeURIComponent`), since URI components separators
+  // are not encoded in the raw routes.
+  return /ö/.test(aElement[mode]) ? encodeURI(target[mode]) : target[mode]
+}
+
+function getRoute(target, mode) {
+  var part = getURLPart(target, mode).slice(modes[mode].length)
+  // IE 11 bug: no leading '/' when getting the 'pathname'
+  if (mode === 'pathname' && !/^\//.test(part)) {
+    part = '/' + part
+  }
+  return part
+}
+
 // routing
 export default function makeRouter(effector) {
-  var modes = {pathname: '', hash: '#', search: '?'}
   var redirect = noop
   var isDefaultRoute = false
   var routeParams, currentRoute
@@ -65,8 +85,8 @@ export default function makeRouter(effector) {
         // route(el, defaultRoute, routes)
       if (arguments.length === 3 && isString(arg1)) {
         redirect = function (source) {
-          var path = currentRoute = normalizeRoute(source)
-          if (!routeByValue(root, arg2, path)) {
+          currentRoute = source
+          if (!routeByValue(root, arg2, source)) {
             if (isDefaultRoute) {
               throw new Error('Ensure the default route matches ' +
                             'one of the routes defined in route')
@@ -83,9 +103,9 @@ export default function makeRouter(effector) {
                 'onpopstate'
 
         window[listener] = function () {
-          var path = location[route.mode]
-          if (route.mode === 'pathname') path += location.search
-          if (currentRoute !== normalizeRoute(path)) redirect(path)
+          var path = getRoute(location, route.mode)
+          if (route.mode === 'pathname') path += getURLPart(location, 'search')
+          if (currentRoute !== path) redirect(path)
         }
 
         effector.preRedraw = setScroll
@@ -97,7 +117,7 @@ export default function makeRouter(effector) {
 
         // config: route
       if (root.addEventListener || root.attachEvent) {
-        var base = route.mode !== 'pathname' ? location.pathname : ''
+        var base = route.mode !== 'pathname' ? getRoute(location, 'pathname') : ''
         root.href = base + modes[route.mode] + vdom.attrs.href
         if (root.addEventListener) {
           root.removeEventListener('click', routeUnobtrusive)
@@ -113,7 +133,7 @@ export default function makeRouter(effector) {
         // route(route, params, shouldReplaceHistoryEntry)
       if (isString(root)) {
         var oldRoute = currentRoute
-        currentRoute = root
+        currentRoute = encodeURI(root)
 
         var args = arg1 || {}
         var queryIndex = currentRoute.indexOf('?')
@@ -146,7 +166,7 @@ export default function makeRouter(effector) {
 
         var replaceHistory =
                 (arguments.length === 3 ? arg2 : arg1) === true ||
-                oldRoute === root
+                oldRoute === currentRoute
 
         if (window.history.pushState) {
           var method = replaceHistory ? 'replaceState' : 'pushState'
@@ -155,10 +175,10 @@ export default function makeRouter(effector) {
             window.history[method](null, document.title,
                         modes[route.mode] + currentRoute)
           }
-          redirect(modes[route.mode] + currentRoute)
+          redirect(currentRoute)
         } else {
           location[route.mode] = currentRoute
-          redirect(modes[route.mode] + currentRoute)
+          redirect(currentRoute)
         }
       }
     }
@@ -178,14 +198,11 @@ export default function makeRouter(effector) {
 
   route.mode = 'search'
 
-  function normalizeRoute(route) {
-    return route.slice(modes[route.mode].length)
-  }
-
   function routeByValue(root, router, path) {
     routeParams = {}
 
     var queryStart = path.indexOf('?')
+    var i = 0
     if (queryStart !== -1) {
       routeParams = parseQueryString(
                 path.substr(queryStart + 1, path.length))
@@ -194,7 +211,7 @@ export default function makeRouter(effector) {
 
         // Get all routes and check if there's
         // an exact match for the current path
-    var keys = Object.keys(router)
+    var keys = Object.keys(router).map(encodeURI)
     var index = keys.indexOf(path)
 
     if (index !== -1){
@@ -203,6 +220,7 @@ export default function makeRouter(effector) {
     }
 
     for (var route in router) if (hasOwn.call(router, route)) {
+      route = keys[i++]
       if (route === path) {
         effector(root, router[route])
         return true
@@ -305,7 +323,7 @@ export default function makeRouter(effector) {
     var args
 
     if (route.mode === 'pathname' && currentTarget.search) {
-      args = parseQueryString(currentTarget.search.slice(1))
+      args = parseQueryString(getURLPart(currentTarget, 'search'))
     } else {
       args = {}
     }
@@ -315,8 +333,7 @@ export default function makeRouter(effector) {
     }
 
         // clear pendingRequests because we want an immediate route change
-    route(currentTarget[route.mode]
-            .slice(modes[route.mode].length), args)
+    route(getRoute(currentTarget, route.mode), args)
   }
 
   route.buildQueryString = buildQueryString
