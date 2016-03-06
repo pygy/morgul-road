@@ -4,10 +4,16 @@ The mithril router extracted for standalone use.
 
 **CAVEAT: This adaptation hasn't been tested at all (I didn't even try to run it). It may very well be broken (or just work as advertised, who knows).**
 
-Usage:
+## Installation:
+
+```bash
+$ npm install morgul-road
+```
+
+## Usage:
 
 ```JS
-import makeRouter from 'morgul-road';
+import makeRouter from 'morgul-road'; // also works with `require('morgul-road')`
 
 // a basic router that swaps DOM nodes
 
